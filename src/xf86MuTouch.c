@@ -1838,7 +1838,7 @@ xf86MuTInit(InputDriverPtr	drv,
 #ifdef XFree86LOADER
 static
 #endif
-InputDriverRec MUTOUCH = {
+_X_EXPORT InputDriverRec MUTOUCH = {
     1,				/* driver version */
     "mutouch",			/* driver name */
     NULL,			/* identify */
@@ -1884,7 +1884,7 @@ static XF86ModuleVersionInfo version_rec = {
  * is setup after the pattern <module_name>ModuleData.
  * Do not change it.
  */
-XF86ModuleData mutouchModuleData = { &version_rec, Plug, Unplug };
+_X_EXPORT XF86ModuleData mutouchModuleData = { &version_rec, Plug, Unplug };
 #endif
 
 #endif /* XFREE86_V4 */
