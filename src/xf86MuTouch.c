@@ -1835,9 +1835,6 @@ xf86MuTInit(InputDriverPtr	drv,
   return NULL;
 }
 
-#ifdef XFree86LOADER
-static
-#endif
 _X_EXPORT InputDriverRec MUTOUCH = {
     1,				/* driver version */
     "mutouch",			/* driver name */
