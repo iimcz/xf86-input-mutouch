@@ -48,7 +48,7 @@
 #endif
 
 #ifdef XFREE86_V4
-#include <X11/misc.h>
+#include "misc.h"
 #include "xf86.h"
 #if !defined(DGUX)
 #include "xf86_ansic.h"
@@ -83,7 +83,7 @@
 #include "xf86_Config.h"
 #include "xf86Xinput.h"
 
-#include <X11/os.h>
+#include "os.h"
 #include "osdep.h"
 #include "exevents.h"
 
