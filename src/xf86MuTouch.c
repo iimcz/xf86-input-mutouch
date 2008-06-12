@@ -320,6 +320,8 @@ typedef struct _MuTPrivateRec {
   int			max_x;		/* Maximum x					*/
   int			min_y;		/* Minimum y reported by calibration		*/
   int			max_y;		/* Maximum y					*/
+  int			x_inverted;     /* X axis inverted?				*/
+  int			y_inverted;     /* Y axis inverted?				*/
 #ifndef XFREE86_V4
   int			link_speed;	/* Speed of the RS232 link connecting the ts.	*/
 #endif
@@ -787,6 +789,10 @@ xf86MuTReadInput(LocalDevicePtr	local)
 	 * Emit a motion. If in core pointer mode we need to calibrate
 	 * or we will feed X with quite bogus event positions.
 	 */
+        if (priv->x_inverted)
+          cur_x = priv->max_x - cur_x;
+        if (priv->y_inverted)
+          cur_y = priv->max_y - cur_y;
 	xf86PostMotionEvent(local_to_use->dev, TRUE, 0, 2, cur_x, cur_y);
 
 	/*
@@ -1798,10 +1804,21 @@ xf86MuTInit(InputDriverPtr	drv,
 
   if (priv->max_x - priv->min_x <= 0) {
     xf86Msg(X_INFO, "MicroTouch: reverse x mode (minimum x position >= maximum x position)\n");
-  }
+    priv->x_inverted = priv->max_x; /* X server doesn't do inverted by itself*/
+    priv->max_x      = priv->min_x;
+    priv->min_x      = priv->max_x;
+    priv->x_inverted = TRUE;
+  } else
+    priv->x_inverted = FALSE;
+
   if (priv->max_y - priv->min_y <= 0) {
     xf86Msg(X_INFO, "MicroTouch: reverse y mode (minimum y position >= maximum y position)\n");
-  }
+    priv->y_inverted = priv->max_y;
+    priv->max_y      = priv->min_y;
+    priv->min_y      = priv->max_y;
+    priv->y_inverted = TRUE;
+  } else
+    priv->y_inverted = FALSE;
 
   if (portrait == 1) {
     /*
