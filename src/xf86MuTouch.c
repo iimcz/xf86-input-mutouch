@@ -1803,19 +1803,21 @@ xf86MuTInit(InputDriverPtr	drv,
   xf86Msg(X_CONFIG, "Microtouch device will work in %s mode\n", str);
 
   if (priv->max_x - priv->min_x <= 0) {
+    int tmp;
     xf86Msg(X_INFO, "MicroTouch: reverse x mode (minimum x position >= maximum x position)\n");
-    priv->x_inverted = priv->max_x; /* X server doesn't do inverted by itself*/
+    tmp              = priv->max_x; /* X server doesn't do inverted by itself*/
     priv->max_x      = priv->min_x;
-    priv->min_x      = priv->max_x;
+    priv->min_x      = tmp;
     priv->x_inverted = TRUE;
   } else
     priv->x_inverted = FALSE;
 
   if (priv->max_y - priv->min_y <= 0) {
+    int tmp;
     xf86Msg(X_INFO, "MicroTouch: reverse y mode (minimum y position >= maximum y position)\n");
-    priv->y_inverted = priv->max_y;
+    tmp              = priv->max_y;
     priv->max_y      = priv->min_y;
-    priv->min_y      = priv->max_y;
+    priv->min_y      = tmp;
     priv->y_inverted = TRUE;
   } else
     priv->y_inverted = FALSE;
