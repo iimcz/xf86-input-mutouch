@@ -426,9 +426,9 @@ xf86MuTReadInput(LocalDevicePtr	local)
 	 * or we will feed X with quite bogus event positions.
 	 */
         if (priv->x_inverted)
-          cur_x = priv->max_x - cur_x;
+          cur_x = priv->max_x - cur_x + priv->min_x;
         if (priv->y_inverted)
-          cur_y = priv->max_y - cur_y;
+          cur_y = priv->max_y - cur_y + priv->min_y;
 	xf86PostMotionEvent(local_to_use->dev, TRUE, 0, 2, cur_x, cur_y);
 
 	/*
