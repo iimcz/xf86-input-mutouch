@@ -60,9 +60,6 @@ XORG_DRIVER_CHECK_EXT(XINPUT, inputproto)
 PKG_CHECK_MODULES(XORG, [xorg-server >= 1.9.0] xproto $REQUIRED_MODULES)
 sdkdir=$(pkg-config --variable=sdkdir xorg-server)
 
-CFLAGS="$CFLAGS $XORG_CFLAGS "' -I$(top_srcdir)/src'
-AC_SUBST([CFLAGS])
-
 # Checks for libraries.
 
 # Checks for header files.
