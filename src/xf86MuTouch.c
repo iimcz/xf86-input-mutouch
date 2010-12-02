@@ -800,7 +800,7 @@ xf86MuTControl(DeviceIntPtr	dev,
       xf86MotionHistoryAllocate(pInfo);
 
       /*
-       * This once has caused the server to crash after doing an xalloc & strcpy ??
+       * This once has caused the server to crash after doing an malloc & strcpy ??
        */
 
       DBG(2, ErrorF("Done.\n"));
@@ -1015,17 +1015,17 @@ xf86MuTAllocate(InputDriverPtr	drv,
 		int		flag)
 {
   InputInfoPtr        pInfo = xf86AllocateInput(drv, 0);
-  MuTPrivatePtr         priv = (MuTPrivatePtr) xalloc(sizeof(MuTPrivateRec));
+  MuTPrivatePtr         priv = (MuTPrivatePtr) malloc(sizeof(MuTPrivateRec));
 
   if (!pInfo) {
     if (priv) {
-      xfree(priv);
+      free(priv);
     }
     return NULL;
   }
   if (!priv) {
     if (pInfo) {
-      xfree(pInfo);
+      free(pInfo);
     }
     return NULL;
   }
@@ -1117,11 +1117,11 @@ xf86MuTUninit(InputDriverPtr	drv,
   if (priv) {
     priv->stylus->private = NULL;
     priv->finger->private = NULL;
-    xfree(priv->input_dev);
-    xfree(priv);
+    free(priv->input_dev);
+    free(priv);
   }
-  xfree(pInfo->name);
-  xfree(pInfo);
+  free(pInfo->name);
+  free(pInfo);
 
   xf86DeleteInput(pInfo, 0);
 }
@@ -1147,7 +1147,7 @@ xf86MuTInit(InputDriverPtr	drv,
   char			*str;
   int			portrait=0;
 
-  fake_pInfo = (InputInfoPtr) xcalloc(1, sizeof(InputInfoRec));
+  fake_pInfo = (InputInfoPtr) calloc(1, sizeof(InputInfoRec));
   if (!fake_pInfo) {
     goto init_err;
   }
@@ -1173,7 +1173,7 @@ xf86MuTInit(InputDriverPtr	drv,
   priv = pInfo->private;
   pInfo->options = fake_pInfo->options;
   pInfo->conf_idev = fake_pInfo->conf_idev;
-  xfree(fake_pInfo);
+  free(fake_pInfo);
   fake_pInfo = NULL;
 
   str = xf86FindOptionValue(pInfo->options, "Device");
@@ -1197,8 +1197,8 @@ xf86MuTInit(InputDriverPtr	drv,
 	(strcmp(((MuTPrivatePtr) (current->private))->input_dev, priv->input_dev) == 0)) {
       xf86Msg(X_CONFIG, "MicroTouch config detected a device share between %s and %s\n",
 	      pInfo->name, current->name);
-      xfree(priv->input_dev);
-      xfree(priv);
+      free(priv->input_dev);
+      free(priv);
       priv = pInfo->private = current->private;
       switch (DEVICE_ID(pInfo->private_flags)) {
       case FINGER_ID:
@@ -1309,16 +1309,16 @@ xf86MuTInit(InputDriverPtr	drv,
 
  init_err:
   if (fake_pInfo) {
-    xfree(fake_pInfo);
+    free(fake_pInfo);
   }
   if (priv) {
     if (priv->input_dev) {
-      xfree(priv->input_dev);
+      free(priv->input_dev);
     }
-    xfree(priv);
+    free(priv);
   }
   if (pInfo) {
-    xfree(pInfo);
+    free(pInfo);
   }
   return NULL;
 }
