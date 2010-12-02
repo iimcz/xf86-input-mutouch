@@ -741,10 +741,8 @@ xf86MuTControl(DeviceIntPtr	dev,
   unsigned char		req[MuT_PACKET_SIZE];
   unsigned char		reply[MuT_BUFFER_SIZE];
   char			*id_string = DEVICE_ID(local->private_flags) == FINGER_ID ? "finger" : "stylus";
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
   Atom btn_label;
   Atom axis_labels[2] = { 0, 0 };
-#endif
 
   switch(mode) {
 
@@ -762,11 +760,7 @@ xf86MuTControl(DeviceIntPtr	dev,
       /*
        * Device reports button press for up to 1 button.
        */
-      if (InitButtonClassDeviceStruct(dev, 1,
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
-				      &btn_label,
-#endif
-				      map) == FALSE) {
+      if (InitButtonClassDeviceStruct(dev, 1, &btn_label, map) == FALSE) {
 	ErrorF("Unable to allocate ButtonClassDeviceStruct\n");
 	return !Success;
       }
@@ -778,30 +772,18 @@ xf86MuTControl(DeviceIntPtr	dev,
        * max and min values scaled from the approximate size of the
        * screen to fit one meter.
        */
-      if (InitValuatorClassDeviceStruct(dev, 2,
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
-				      axis_labels,
-#endif
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 3
-					xf86GetMotionEvents,
-#endif
+      if (InitValuatorClassDeviceStruct(dev, 2, axis_labels,
 					local->history_size, Absolute) == FALSE) {
 	ErrorF("Unable to allocate ValuatorClassDeviceStruct\n");
 	return !Success;
       }
       else {
-	InitValuatorAxisStruct(dev, 0,
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
-			       axis_labels[0],
-#endif
+	InitValuatorAxisStruct(dev, 0, axis_labels[0],
 			       priv->min_x, priv->max_x,
 			       9500,
 			       0     /* min_res */,
 			       9500  /* max_res */);
-	InitValuatorAxisStruct(dev, 1,
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
-			       axis_labels[1],
-#endif
+	InitValuatorAxisStruct(dev, 1, axis_labels[1],
 			       priv->min_y, priv->max_y,
 			       10500,
 			       0     /* min_res */,
