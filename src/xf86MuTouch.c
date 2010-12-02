@@ -196,7 +196,7 @@ static int      debug_level = 0;
  */
 #define FINGER_ID		1
 #define STYLUS_ID		2
-#define DEVICE_ID(flags)	((flags) & 0x03)
+#define DEVICE_ID(pInfo) (((MuTPrivatePtr)(pInfo)->private)->device_type)
 
 typedef struct _MuTPrivateRec {
   char			*input_dev;	/* The touchscreen input tty			*/
@@ -217,6 +217,7 @@ typedef struct _MuTPrivateRec {
   InputInfoPtr	stylus;		/* Stylus device ptr associated with the hw.	*/
   int			swap_axes;	/* Swap X an Y axes if != 0 */
   unsigned char		rec_buf[MuT_BUFFER_SIZE]; /* Receive buffer.			*/
+  int			device_type;	/* FINGER_ID or STYLUS_ID */
 } MuTPrivateRec, *MuTPrivatePtr;
 
 
@@ -684,7 +685,7 @@ xf86MuTControl(DeviceIntPtr	dev,
   unsigned char		map[] = { 0, 1 };
   unsigned char		req[MuT_PACKET_SIZE];
   unsigned char		reply[MuT_BUFFER_SIZE];
-  char			*id_string = DEVICE_ID(pInfo->private_flags) == FINGER_ID ? "finger" : "stylus";
+  char			*id_string = DEVICE_ID(pInfo) == FINGER_ID ? "finger" : "stylus";
   Atom btn_label;
   Atom axis_labels[2] = { 0, 0 };
 
@@ -766,7 +767,7 @@ xf86MuTControl(DeviceIntPtr	dev,
 	already_open = TRUE;
       }
       else {
-	switch (DEVICE_ID(pInfo->private_flags)) {
+	switch (DEVICE_ID(pInfo)) {
 	case FINGER_ID:
 	  if (priv->stylus && priv->stylus->fd >= 0) {
 	    already_open = TRUE;
@@ -849,7 +850,7 @@ xf86MuTControl(DeviceIntPtr	dev,
        * Select Pen / Finger reports depending on which devices are
        * currently on.
        */
-      switch (DEVICE_ID(pInfo->private_flags)) {
+      switch (DEVICE_ID(pInfo)) {
       case FINGER_ID:
 	if (priv->stylus && priv->stylus->dev->public.on) {
 	  report_what = MuT_PEN_FINGER;
@@ -924,7 +925,7 @@ xf86MuTControl(DeviceIntPtr	dev,
       /*
        * Need some care to close the port only once.
        */
-      switch (DEVICE_ID(pInfo->private_flags)) {
+      switch (DEVICE_ID(pInfo)) {
 	case FINGER_ID:
 	  if (priv->stylus) {
 	    priv->stylus->fd = -1;
@@ -989,6 +990,7 @@ xf86MuTAllocate(InputDriverPtr	drv,
   priv->finger = NULL;
   priv->swap_axes = 0;
   priv->frequency = 0;
+  priv->device_type = flag;
 
   pInfo->name = name;
   pInfo->flags = 0 /* XI86_NO_OPEN_ON_INIT */;
@@ -1000,7 +1002,6 @@ xf86MuTAllocate(InputDriverPtr	drv,
   pInfo->atom = 0;
   pInfo->dev = NULL;
   pInfo->private = priv;
-  pInfo->private_flags = flag;
   pInfo->type_name = type_name;
 
   return pInfo;
@@ -1140,7 +1141,7 @@ xf86MuTInit(InputDriverPtr	drv,
       free(priv->input_dev);
       free(priv);
       priv = pInfo->private = current->private;
-      switch (DEVICE_ID(pInfo->private_flags)) {
+      switch (DEVICE_ID(pInfo)) {
       case FINGER_ID:
 	priv->finger = pInfo;
 	break;
