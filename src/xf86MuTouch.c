@@ -1348,7 +1348,6 @@ _X_EXPORT InputDriverRec MUTOUCH = {
     xf86MuTInit,		/* pre-init */
     xf86MuTUninit,		/* un-init */
     NULL,			/* module */
-    0				/* ref count */
 };
 
 static pointer
