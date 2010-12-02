@@ -717,7 +717,7 @@ xf86MuTControl(DeviceIntPtr	dev,
        * screen to fit one meter.
        */
       if (InitValuatorClassDeviceStruct(dev, 2, axis_labels,
-					pInfo->history_size, Absolute) == FALSE) {
+					GetMotionHistorySize(), Absolute) == FALSE) {
 	ErrorF("Unable to allocate ValuatorClassDeviceStruct\n");
 	return !Success;
       }
@@ -1002,7 +1002,6 @@ xf86MuTAllocate(InputDriverPtr	drv,
   pInfo->private = priv;
   pInfo->private_flags = flag;
   pInfo->type_name = type_name;
-  pInfo->history_size = 0;
 
   return pInfo;
 }
