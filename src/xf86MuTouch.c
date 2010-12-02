@@ -59,6 +59,9 @@
 
 #include "xf86Module.h"
 
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 12
+#error "Need server with input ABI 12"
+#endif
 /*
  ***************************************************************************
  *
@@ -727,12 +730,14 @@ xf86MuTControl(DeviceIntPtr	dev,
 			       priv->min_x, priv->max_x,
 			       9500,
 			       0     /* min_res */,
-			       9500  /* max_res */);
+			       9500  /* max_res */,
+			       Absolute);
 	InitValuatorAxisStruct(dev, 1, axis_labels[1],
 			       priv->min_y, priv->max_y,
 			       10500,
 			       0     /* min_res */,
-			       10500 /* max_res */);
+			       10500 /* max_res */,
+			       Absolute);
       }
 
       if (InitFocusClassDeviceStruct(dev) == FALSE) {
@@ -953,26 +958,17 @@ xf86MuTControl(DeviceIntPtr	dev,
  *
  ***************************************************************************
  */
-static InputInfoPtr
+static int
 xf86MuTAllocate(InputDriverPtr	drv,
+		InputInfoPtr	pInfo,
 		char		*name,
 		char		*type_name,
 		int		flag)
 {
-  InputInfoPtr        pInfo = xf86AllocateInput(drv, 0);
   MuTPrivatePtr         priv = (MuTPrivatePtr) malloc(sizeof(MuTPrivateRec));
 
-  if (!pInfo) {
-    if (priv) {
-      free(priv);
-    }
-    return NULL;
-  }
   if (!priv) {
-    if (pInfo) {
-      free(pInfo);
-    }
-    return NULL;
+    return BadAlloc;
   }
 
   priv->input_dev = strdup(MuT_PORT);
@@ -992,19 +988,16 @@ xf86MuTAllocate(InputDriverPtr	drv,
   priv->frequency = 0;
   priv->device_type = flag;
 
-  pInfo->name = name;
   pInfo->flags = 0 /* XI86_NO_OPEN_ON_INIT */;
   pInfo->device_control = xf86MuTControl;
   pInfo->read_input = xf86MuTReadInput;
   pInfo->control_proc = NULL;
   pInfo->switch_mode = NULL;
   pInfo->fd = -1;
-  pInfo->atom = 0;
-  pInfo->dev = NULL;
   pInfo->private = priv;
   pInfo->type_name = type_name;
 
-  return pInfo;
+  return Success;
 }
 
 
@@ -1015,15 +1008,15 @@ xf86MuTAllocate(InputDriverPtr	drv,
  *
  ***************************************************************************
  */
-static InputInfoPtr
-xf86MuTAllocateFinger(InputDriverPtr	drv)
+static int
+xf86MuTAllocateFinger(InputDriverPtr drv, InputInfoPtr pInfo)
 {
-  InputInfoPtr	pInfo = xf86MuTAllocate(drv, XI_FINGER, "MicroTouch Finger", FINGER_ID);
+  int rc = xf86MuTAllocate(drv, pInfo, XI_FINGER, "MicroTouch Finger", FINGER_ID);
 
-  if (pInfo) {
+  if (rc == Success) {
     ((MuTPrivatePtr) pInfo->private)->finger = pInfo;
   }
-  return pInfo;
+  return rc;
 }
 
 
@@ -1034,15 +1027,15 @@ xf86MuTAllocateFinger(InputDriverPtr	drv)
  *
  ***************************************************************************
  */
-static InputInfoPtr
-xf86MuTAllocateStylus(InputDriverPtr	drv)
+static int
+xf86MuTAllocateStylus(InputDriverPtr drv, InputInfoPtr pInfo)
 {
-  InputInfoPtr	pInfo = xf86MuTAllocate(drv, XI_STYLUS, "MicroTouch Stylus", STYLUS_ID);
+    int rc = xf86MuTAllocate(drv, pInfo, XI_STYLUS, "MicroTouch Stylus", STYLUS_ID);
 
-  if (pInfo) {
+  if (rc == Success) {
     ((MuTPrivatePtr) pInfo->private)->stylus = pInfo;
   }
-  return pInfo;
+  return rc;
 }
 
 
@@ -1067,7 +1060,7 @@ xf86MuTUninit(InputDriverPtr	drv,
   xf86DeleteInput(pInfo, 0);
 }
 
-static const char *default_options[] = {
+static char *default_options[] = {
   "BaudRate", "9600",
   "StopBits", "1",
   "DataBits", "8",
@@ -1078,49 +1071,39 @@ static const char *default_options[] = {
   NULL
 };
 
-static InputInfoPtr
+static int
 xf86MuTInit(InputDriverPtr	drv,
-	    IDevPtr		dev,
+	    InputInfoPtr	pInfo,
 	    int			flags)
 {
-  InputInfoPtr	pInfo=NULL, fake_pInfo=NULL, current;
+  InputInfoPtr		current;
   MuTPrivatePtr		priv=NULL;
   char			*str;
   int			portrait=0;
+  int			rc = Success;
 
-  fake_pInfo = (InputInfoPtr) calloc(1, sizeof(InputInfoRec));
-  if (!fake_pInfo) {
-    goto init_err;
-  }
-  fake_pInfo->conf_idev = dev;
-
-  xf86CollectInputOptions(fake_pInfo, default_options, NULL);
-
-  str = xf86FindOptionValue(fake_pInfo->options, "Type");
+  str = xf86FindOptionValue(pInfo->options, "Type");
   if (str && (xf86NameCmp(str, "finger") == 0)) {
-    pInfo = xf86MuTAllocateFinger(drv);
+    rc = xf86MuTAllocateFinger(drv, pInfo);
   }
   else if (str && (xf86NameCmp(str, "stylus") == 0)) {
-    pInfo = xf86MuTAllocateStylus(drv);
+    rc = xf86MuTAllocateStylus(drv, pInfo);
   }
   else {
     xf86Msg(X_ERROR, "%s: Type field missing in Microtouch module config,\n"
-	    "Must be stylus or finger\n", dev->identifier);
+	    "Must be stylus or finger\n", pInfo->name);
     goto init_err;
   }
-  if (!pInfo) {
+  if (rc != Success) {
     goto init_err;
   }
   priv = pInfo->private;
-  pInfo->options = fake_pInfo->options;
-  pInfo->conf_idev = fake_pInfo->conf_idev;
-  free(fake_pInfo);
-  fake_pInfo = NULL;
 
   str = xf86FindOptionValue(pInfo->options, "Device");
   if (!str) {
     xf86Msg(X_ERROR, "%s: No Device specified in Microtouch module config.\n",
-	    dev->identifier);
+	    pInfo->name);
+    rc = BadValue;
     goto init_err;
   }
   priv->input_dev = strdup(str);
@@ -1244,14 +1227,9 @@ xf86MuTInit(InputDriverPtr	drv,
     priv->swap_axes = (priv->swap_axes==0) ? 1 : 0;
   }
 
-  /* mark the device configured */
-  pInfo->flags |= XI86_CONFIGURED;
-  return pInfo;
+  return Success;
 
  init_err:
-  if (fake_pInfo) {
-    free(fake_pInfo);
-  }
   if (priv) {
     if (priv->input_dev) {
       free(priv->input_dev);
@@ -1261,7 +1239,7 @@ xf86MuTInit(InputDriverPtr	drv,
   if (pInfo) {
     free(pInfo);
   }
-  return NULL;
+  return rc;
 }
 
 _X_EXPORT InputDriverRec MUTOUCH = {
@@ -1271,6 +1249,7 @@ _X_EXPORT InputDriverRec MUTOUCH = {
     xf86MuTInit,		/* pre-init */
     xf86MuTUninit,		/* un-init */
     NULL,			/* module */
+    default_options,
 };
 
 static pointer
