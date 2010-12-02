@@ -220,62 +220,6 @@ typedef struct _MuTPrivateRec {
 } MuTPrivateRec, *MuTPrivatePtr;
 
 
-
-
-/*
- ***************************************************************************
- *
- * xf86MuTConvert --
- *	Convert extended valuators to x and y suitable for core motion
- *	events. Return True if ok and False if the requested conversion
- *	can't be done for the specified valuators.
- *
- ***************************************************************************
- */
-static Bool
-xf86MuTConvert(InputInfoPtr	pInfo,
-	       int		first,
-	       int		num,
-	       int		v0,
-	       int		v1,
-	       int		v2,
-	       int		v3,
-	       int		v4,
-	       int		v5,
-	       int		*x,
-	       int		*y)
-{
-  MuTPrivatePtr	priv = (MuTPrivatePtr) pInfo->private;
-  int		width = priv->max_x - priv->min_x;
-  int		height = priv->max_y - priv->min_y;
-  int		input_x, input_y;
-
-  if (first != 0 || num != 2)
-    return FALSE;
-
-  if (priv->swap_axes) {
-    input_x = v1;
-    input_y = v0;
-  }
-  else {
-    input_x = v0;
-    input_y = v1;
-  }
-  *x = (priv->screen_width * (input_x - priv->min_x)) / width;
-  *y = (priv->screen_height -
-	(priv->screen_height * (input_y - priv->min_y)) / height);
-
-  /*
-   * Need to check if still on the correct screen.
-   * This call is here so that this work can be done after
-   * calib and before posting the event.
-   */
-  xf86XInputSetScreen(pInfo, priv->screen_no, *x, *y);
-
-  return TRUE;
-}
-
-
 /*
  ***************************************************************************
  *
@@ -1051,10 +995,7 @@ xf86MuTAllocate(InputDriverPtr	drv,
   pInfo->device_control = xf86MuTControl;
   pInfo->read_input = xf86MuTReadInput;
   pInfo->control_proc = NULL;
-  pInfo->close_proc = NULL;
   pInfo->switch_mode = NULL;
-  pInfo->conversion_proc = xf86MuTConvert;
-  pInfo->reverse_conversion_proc = NULL;
   pInfo->fd = -1;
   pInfo->atom = 0;
   pInfo->dev = NULL;
