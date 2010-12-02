@@ -57,13 +57,7 @@
 #include "xf86Xinput.h"
 #include "exevents.h"
 
-#ifdef XFree86LOADER
 #include "xf86Module.h"
-#endif
-
-
-
-
 
 /*
  ***************************************************************************
@@ -1357,7 +1351,6 @@ _X_EXPORT InputDriverRec MUTOUCH = {
     0				/* ref count */
 };
 
-#ifdef XFree86LOADER
 static pointer
 Plug(pointer	module,
      pointer	options,
@@ -1394,5 +1387,3 @@ static XF86ModuleVersionInfo version_rec = {
  * Do not change it.
  */
 _X_EXPORT XF86ModuleData mutouchModuleData = { &version_rec, Plug, Unplug };
-#endif
-
