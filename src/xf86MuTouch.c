@@ -1048,9 +1048,8 @@ xf86MuTUninit(InputDriverPtr	drv,
     priv->finger->private = NULL;
     free(priv->input_dev);
     free(priv);
+    pInfo->private = NULL;
   }
-  free(pInfo->name);
-  free(pInfo);
 
   xf86DeleteInput(pInfo, 0);
 }
