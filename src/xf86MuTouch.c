@@ -1043,8 +1043,6 @@ xf86MuTUninit(InputDriverPtr	drv,
 {
   MuTPrivatePtr		priv = (MuTPrivatePtr) pInfo->private;
 
-  xf86MuTControl(pInfo->dev, DEVICE_OFF);
-
   if (priv) {
     priv->stylus->private = NULL;
     priv->finger->private = NULL;
