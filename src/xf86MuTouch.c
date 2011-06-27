@@ -59,9 +59,6 @@
 
 #include "xf86Module.h"
 
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 12
-#error "Need server with input ABI 12"
-#endif
 /*
  ***************************************************************************
  *
