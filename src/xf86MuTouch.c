@@ -1232,9 +1232,7 @@ xf86MuTInit(InputDriverPtr	drv,
       free(priv->input_dev);
     }
     free(priv);
-  }
-  if (pInfo) {
-    free(pInfo);
+    pInfo->private = NULL;
   }
   return rc;
 }
