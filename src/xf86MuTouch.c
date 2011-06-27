@@ -1044,8 +1044,6 @@ xf86MuTUninit(InputDriverPtr	drv,
   MuTPrivatePtr		priv = (MuTPrivatePtr) pInfo->private;
 
   if (priv) {
-    priv->stylus->private = NULL;
-    priv->finger->private = NULL;
     free(priv->input_dev);
     free(priv);
     pInfo->private = NULL;
