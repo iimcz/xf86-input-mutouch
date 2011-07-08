@@ -1135,11 +1135,6 @@ xf86MuTInit(InputDriverPtr	drv,
   /* Process the common options. */
   xf86ProcessCommonOptions(pInfo, pInfo->options);
 
-  str = xf86FindOptionValue(pInfo->options, "DeviceName");
-  if (str) {
-    pInfo->name = strdup(str);
-  }
-  xf86Msg(X_CONFIG, "MuTouch X device name: %s\n", pInfo->name);
   priv->screen_no = xf86SetIntOption(pInfo->options, "ScreenNo", 0);
   xf86Msg(X_CONFIG, "MuTouch associated screen: %d\n", priv->screen_no);
   priv->max_x = xf86SetIntOption(pInfo->options, "MaxX", 3000);
