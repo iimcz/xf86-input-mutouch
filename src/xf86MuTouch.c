@@ -1097,6 +1097,15 @@ xf86MuTInit(InputDriverPtr	drv,
 	    pInfo->name);
     rc = BadValue;
     goto init_err;
+  } else {
+	pInfo->fd = xf86OpenSerial(pInfo->options);
+	if (pInfo->fd < 0) {
+	  xf86Msg(X_ERROR, "%s: Unable to open MuTouch touchscreen device '%s'\n", pInfo->name, str);
+	  rc = BadValue;
+	  goto init_err;
+	}
+	close(pInfo->fd);
+	pInfo->fd = -1;
   }
   priv->input_dev = strdup(str);
 
