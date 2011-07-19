@@ -1214,16 +1214,9 @@ xf86MuTInit(InputDriverPtr	drv,
     priv->swap_axes = (priv->swap_axes==0) ? 1 : 0;
   }
 
-  return Success;
+  rc = Success;
 
  init_err:
-  if (priv) {
-    if (priv->input_dev) {
-      free(priv->input_dev);
-    }
-    free(priv);
-    pInfo->private = NULL;
-  }
   return rc;
 }
 
