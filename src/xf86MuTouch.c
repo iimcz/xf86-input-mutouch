@@ -1074,7 +1074,7 @@ xf86MuTInit(InputDriverPtr	drv,
   int			portrait=0;
   int			rc = Success;
 
-  str = xf86FindOptionValue(pInfo->options, "Type");
+  str = xf86SetStrOption(pInfo->options, "Type", NULL);
   if (str && (xf86NameCmp(str, "finger") == 0)) {
     rc = xf86MuTAllocateFinger(drv, pInfo);
   }
@@ -1091,7 +1091,7 @@ xf86MuTInit(InputDriverPtr	drv,
   }
   priv = pInfo->private;
 
-  str = xf86FindOptionValue(pInfo->options, "Device");
+  str = xf86SetStrOption(pInfo->options, "Device", NULL);
   if (!str) {
     xf86Msg(X_ERROR, "%s: No Device specified in MuTouch module config.\n",
 	    pInfo->name);
