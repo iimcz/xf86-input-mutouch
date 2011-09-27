@@ -68,4 +68,12 @@ AC_HEADER_STDC
 XORG_MANPAGE_SECTIONS
 XORG_RELEASE_VERSION
 
+AC_MSG_WARN([
+    ***************************************************************************
+    This driver is unmaintained, untested and may not build.
+    Any fixes to this driver will only be applied if you have a device and you
+    can test patches. See
+    http://lists.freedesktop.org/archives/xorg-devel/2011-September/025336.html
+    ***************************************************************************])
+
 AC_OUTPUT([Makefile src/Makefile man/Makefile])
